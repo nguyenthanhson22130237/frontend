@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Sản Phẩm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Menu bên trái */
+        .sidebar {
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #444;
+        }
+
+        /* Nội dung chính */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .main-content h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .top-bar button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .top-bar button:hover {
+            background-color: #45a049;
+        }
+
+        /* Bảng sản phẩm */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #f0f0f0;
+        }
+
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        table td img {
+            width: 50px;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        table .actions a {
+            color: #007BFF;
+            text-decoration: none;
+            margin: 0 5px;
+            transition: color 0.3s;
+        }
+
+        table .actions a:hover {
+            color: #0056b3;
+        }
+
+        /* Form thêm sản phẩm */
+        .form-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .form-popup input, .form-popup textarea, .form-popup button {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-popup button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .form-popup button:hover {
+            background-color: #45a049;
+        }
+
+        .form-popup .close-btn {
+            background-color: #f44336;
+        }
+
+        .form-popup .close-btn:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <!-- Menu bên trái -->
+    <div class="sidebar">
+        <h2>Admin Menu</h2>
+        <ul>
+            <li><a href="#">Khách hàng</a></li>
+            <li><a href="#">Khuyến mãi</a></li>
+            <li><a href="#">Sản phẩm</a></li>
+            <li><a href="#">Đơn hàng</a></li>
+        </ul>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div class="main-content">
+        <h1>Danh sách sản phẩm</h1>
+        <div class="top-bar">
+            <div></div>
+            <!-- [Step 1] User -> Frontend: Click "Thêm sản phẩm" -->
+            <button onclick="openAddProductForm()">Thêm sản phẩm</button>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Ảnh</th>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Mô tả</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ... Phần đầu trang giống như bạn đã có ... -->
+
+<!-- [Step 2] Hệ thống hiển thị popup form thêm sản phẩm -->
+<div class="form-popup" id="addProductForm">
+    <h2>Thêm sản phẩm mới</h2>
+    <!-- Các input để người dùng nhập thông tin sản phẩm -->
+    <input type="text" id="id" placeholder="ID" required />
+    <input type="text" id="name" placeholder="Tên sản phẩm" required />
+    <textarea id="description" placeholder="Mô tả sản phẩm" required></textarea>
+    <input type="text" id="imageUrl" placeholder="URL hình ảnh" required />
+    <input type="text" id="number" placeholder="Số lượng" required />
+    <input type="number" id="price" placeholder="Giá sản phẩm" required />
+    <button onclick="addProduct()">Lưu</button>
+    <button class="close-btn" onclick="closeAddProductForm()">Đóng</button>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/products";
+
+    // [Step 3] Khi tải trang lần đầu, tự động gọi API để hiển thị danh sách sản phẩm
+    // Mapped to: fetchProducts()
+    fetchProducts();
+
+    // [Step 1] Admin nhấn nút "Thêm sản phẩm" trên giao diện web.
+    // Mapped to: openAddProductForm()
+    function openAddProductForm() {
+        // [Step 2] Hệ thống hiển thị popup form thêm sản phẩm.
+        document.getElementById("addProductForm").style.display = "block";
+    }
+
+    function closeAddProductForm() {
+        document.getElementById("addProductForm").style.display = "none";
+    }
+
+    // [Step 3] Admin điền thông tin sản phẩm và nhấn nút "Lưu".
+    // Mapped to: addProduct()
+    async function addProduct() {
+        const id = document.getElementById("id").value;
+        const name = document.getElementById("name").value;
+        const description = document.getElementById("description").value;
+        const imageUrl = document.getElementById("imageUrl").value;
+        const number = document.getElementById("number").value;
+        const price = parseFloat(document.getElementById("price").value);
+
+        // Kiểm tra thông tin nhập liệu
+        if (!id || !name || !description || !imageUrl || !number || isNaN(price) || price <= 0) {
+            alert("Vui lòng điền đầy đủ thông tin và kiểm tra giá sản phẩm!");
+            return;
+        }
+
+        const product = { id, name, description, imageUrl, number, price };
+
+        // [Step 4] Dữ liệu sản phẩm được gửi tới backend qua API POST /api/products.
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(product)
+        });
+
+        if (response.ok) {
+            alert("Thêm sản phẩm thành công!");
+            closeAddProductForm();
+
+            // [Step 9] Kết quả thành công trả về client, cập nhật bảng.
+            // Mapped to: fetchProducts()
+            fetchProducts();
+        } else {
+            alert("Có lỗi xảy ra khi thêm sản phẩm!");
+        }
+    }
+
+    // [Step 3] Gửi HTTP GET đến backend để lấy danh sách sản phẩm
+    // Mapped to: fetchProducts()
+    async function fetchProducts() {
+        // [Step 3] Frontend -> Backend (GET /api/products): Gửi yêu cầu lấy danh sách sản phẩm
+        const response = await fetch(API_URL);
+        const products = await response.json();
+        const productTable = document.getElementById("productTable");
+
+        // [Step 3] Frontend -> User: Cập nhật bảng sản phẩm
+        productTable.innerHTML = products.map(product => `
+        <tr>
+          <td><img src="${product.imageUrl}" alt="${product.name}" /></td>
+          <td>${product.id}</td>
+          <td>${product.name}</td>
+          <td>${product.description}</td>
+          <td>${product.number}</td>
+          <td>${product.price} VNĐ</td>
+          <td>${new Date(product.createdDate).toLocaleDateString()}</td>
+          <td class="actions">
+            <a href="#">Sửa</a>
+            <a href="#">Xóa</a>
+          </td>
+        </tr>
+      `).join('');
+    }
+</script>
+</body>
+</html>
